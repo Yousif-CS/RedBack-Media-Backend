@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "RedBack-Media-Backend",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/boost_1_73_0"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++-7",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "${default}"
+        }
+    ],
+    "version": 4
+}

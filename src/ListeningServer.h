@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LISTENINGSERVERH
+#define LISTENINGSERVERH
 
 #include <iostream>
 #include <vector>
@@ -38,4 +39,4 @@ class ListeningServer {
 		std::string host_;
 	};
 } // RedBack
-
+#endif

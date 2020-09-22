@@ -1,3 +1,6 @@
+#ifndef CLIENTH
+#define CLIENTH
+
 #include <iostream>
 #include <string>
 #include <functional>
@@ -93,3 +96,5 @@ namespace RedBack {
 
 	} // Client
 } // RedBack
+
+#endif

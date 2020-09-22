@@ -5,17 +5,11 @@
 #include <thread>
 
 #include "boost/asio.hpp"
-#include "boost/beast/ssl.hpp"
-#include "boost/beast/websocket/ssl.hpp"
-#include "boost/asio/ssl/stream.hpp"
 #include "boost/asio/ip/tcp.hpp"
 #include "boost/beast/core/buffers_to_string.hpp"
 #include "CustomWebSocket.h"
 
-namespace net = boost::asio;
 namespace beast = boost::beast;
-namespace ssl = boost::asio::ssl;
-namespace net = boost::asio;            // from <boost/asio.hpp>
 using namespace boost::beast;
 using namespace boost::beast::websocket;
 using tcp = boost::asio::ip::tcp;
@@ -30,7 +24,7 @@ namespace RedBack {
 
 	template<typename T>
 	void WebSocket<T>::send(std::string payload) {
-		ws_->write(net::buffer(payload));
+		ws_->write(boost::asio::buffer(payload));
 	}
 
 	template<typename T>

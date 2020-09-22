@@ -1,3 +1,6 @@
+#ifndef EVENTSOCKETH
+#define EVENTSOCKETH
+
 #include <iostream>
 #include <string>
 #include <functional>
@@ -7,7 +10,8 @@
 #include <exception>
 #include <queue>
 #include <map>
-#include "json/json.h"
+
+#include "jsoncpp/json/json.h"
 
 std::mutex eventQueueMutex;
 
@@ -90,3 +94,5 @@ namespace RedBack {
 		std::queue<std::pair<std::string, std::string>> eventQueue;
 	};
 } // RedBack
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CUSTOMWEBSOCKETH
+#define CUSTOMWEBSOCKETH
 
 #include "boost/beast/websocket.hpp"
 #include "boost/beast/core.hpp"
@@ -43,4 +44,4 @@ namespace RedBack {
 	};
 
 } // RedBack
-
+#endif
