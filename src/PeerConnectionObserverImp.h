@@ -7,10 +7,14 @@
 
 #include "api/peer_connection_interface.h"
 
-class PeerConnectionObserverImp: webrtc::PeerConnectionObserver {
+class PeerConnectionObserverImp: public webrtc::PeerConnectionObserver {
 public:
     void set_on_ice_candidate(std::function<void(const webrtc::IceCandidateInterface*)> callback){
-        ice_candidate_callback = callback;
+        ice_candidate_callback_ = callback;
+    }
+
+    void set_on_data_channel(std::function<void(rtc::scoped_refptr<webrtc::DataChannelInterface>)> callback){
+        data_channel_callback_ = callback;
     }
 
     // Called when the signaling state changes
@@ -29,8 +33,8 @@ public:
       rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel) override;
 
 private:
-    std::function<void(rtc::scoped_refptr<webrtc::DataChannelInterface>)> data_channel_callback;
-    std::function<void(const webrtc::IceCandidateInterface*)> ice_candidate_callback;
+    std::function<void(rtc::scoped_refptr<webrtc::DataChannelInterface>)> data_channel_callback_;
+    std::function<void(const webrtc::IceCandidateInterface*)> ice_candidate_callback_;
 };
 
 #endif

@@ -4,16 +4,12 @@
 #include <iostream>
 #include <string>
 #include <functional>
-#include <mutex>
-#include <thread>
-#include <future>
+#include <memory>
 #include <exception>
-#include <queue>
 #include <map>
 
 #include "jsoncpp/json/json.h"
-
-std::mutex eventQueueMutex;
+#include "jsoncpp/json/value.h"
 
 namespace RedBack {
 
@@ -24,74 +20,62 @@ namespace RedBack {
 		EventSocket(T& t)
 		:t_{t}
 		{
-			t.set_on_receive([this](std::string payload) { event_enqueue(payload); });
+			default_callback_ = t.get_on_receive_callback();
+			t.set_on_receive([this](std::string payload) { event_forward(payload); });
 		}
 		
-		//template<typename R>
-		//void set_on_disconnect(std::function<R(std::string)> callback)
-		//{
-		//	disconnect_callback = callback;
-		//}
+		/*
+		Set a callback to be called when the specified event is received
+		*/
+		void on_event(std::string eventName, std::function<void(std::string)> callback)
+		{
+			eventCallbacks_[eventName] = callback;
+		}
+		
+		void set_default_callback(std::function<void(std::string)> callback)
+		{
+			default_callback_ = callback;
+		}
 
-		//template<typename C>
-		//void set_event(std::string eventName, std::function<C(std::string)> callback)
-		//{
-		//	eventCallbacks[eventName] = callback;
-		//}
-		//
-		////The default callback for a message that is not an event
-		//template <typename C>
-		//void set_default_callback(std::function<C(std::string)> callback)
-		//{
-		//	default_callback = callback;
-		//}
 
-		// returns the object calculated from the callback(event handler) when the event happens 
-		template <typename C>
-		std::future<C> listen(std::string eventName, std::function<C(std::string)> callback){
-			std::future<C> futureObj = std::async(std::launch::async, &EventSocket<T>::wait_then_perform<C>, this, eventName, callback);
-			return futureObj;
+		/*
+		Emit an event with payload 
+		*/
+		void emit_event(std::string eventName, std::string payload){
+			Json::Value root;
+			root["eventName"] = eventName;
+			root["payload"] = payload;
+			Json::FastWriter writer;
+
+			t_.send(writer.write(root));
+
 		}
 
 	private:
 
-		// Keeps listening for an event and when it happens, calls the "callback"
-		template<typename C>
-		C wait_then_perform(std::string eventName, std::function<C(std::string)> callback) {
-			while (true) {
-				if (!eventQueue.empty() && eventName == eventQueue.front().first) {
-					break;
-				}
-			}
-			std::lock_guard<std::mutex> guard(eventQueueMutex);
-			std::string payload = eventQueue.front().second;
-			eventQueue.pop();
-			return callback(payload);
-
-		}
-
 		// Forwards an event to the queue that callbacks
 		//are listening on
-		void event_enqueue(std::string payload) {
+		void event_forward(std::string payload) {
 			Json::Value root;
 			Json::Reader reader;
-			std::string errors;
 			if (!reader.parse(payload.c_str(), root)) {
 				throw std::runtime_error("Error: Could not parse payload");
 			}
-			std::lock_guard<std::mutex> guard(eventQueueMutex);
-			eventQueue.push(std::pair<std::string, std::string>(root["eventName"].asString(), root["payload"].asString()));
+			
+			if (eventCallbacks_.find(root["eventName"].asString()) == eventCallbacks_.end()){
+				default_callback_(root["payload"].asString());	
+			}else {
+				eventCallbacks_[root["eventName"].asString()](root["payload"].asString());
+			}
+
 		}
 
-		//template<typename C>
-		//std::map<std::string, std::function<C(std::string)>> eventCallbacks;
+		std::map<std::string, std::function<void(std::string)>> eventCallbacks_;
 		
-		//template<typename R>
-		//std::function<R(std::string)> default_callback;
+		std::function<void(std::string)> default_callback_;
 
 		T& t_;
 
-		std::queue<std::pair<std::string, std::string>> eventQueue;
 	};
 } // RedBack
 

@@ -35,18 +35,6 @@ int main(int argc, char* argv[]) {
 	while (true) {
 		std::shared_ptr<RedBack::WebSocket<tcp::socket>> ws = server.accept();
 		RedBack::EventSocket<RedBack::WebSocket<tcp::socket>> es{ *ws };
-
-
-		auto futureObject1 = es.listen<std::string>("Hello", [](std::string payload){
-			return payload;
-		});
-
-		auto futureObject2 = es.listen<std::string>("World", [](std::string payload) {
-			return payload;
-		});
-
-		std::cout << "World Event: " << futureObject2.get() << std::endl;
-		std::cout << "Hello Event: " << futureObject1.get() << std::endl;
 	}
 	//RedBack::Client::establish<void>("localhost", "6969", [argv](WebSocketClient& ws) {
 	//	std::string eventName;

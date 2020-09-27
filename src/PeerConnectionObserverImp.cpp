@@ -66,7 +66,7 @@ void PeerConnectionObserverImp::OnIceCandidate(const webrtc::IceCandidateInterfa
 #endif //REDBACK_DEBUG
 
         //a callback to execute when an ice candidate is gathered
-        ice_candidate_callback(candidate);
+        ice_candidate_callback_(candidate);
 }
 
 // Triggered when a remote peer opens a data channel.
@@ -78,6 +78,6 @@ void PeerConnectionObserverImp::OnDataChannel(
 #endif //REDBACK_DEBUG
 
     //deal with the data channel
-    data_channel_callback(data_channel);
+    data_channel_callback_(data_channel);
 
 }

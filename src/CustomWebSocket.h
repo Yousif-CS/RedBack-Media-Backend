@@ -22,6 +22,9 @@ namespace RedBack {
 		// Set a handler when the socket receives data
 		void set_on_receive(std::function<void(std::string payload)> callback) { receive_callback_ = callback; }
 
+		// Get the receive callback function
+		std::function<void(std::string)> get_on_receive_callback() { return receive_callback_; }
+
 		// Get a shared pointer to this object
 		std::shared_ptr<WebSocket<T>> getPtr() {
 			return this->shared_from_this();
