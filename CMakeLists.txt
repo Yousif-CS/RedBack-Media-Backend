@@ -20,7 +20,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${BOOST_HEADERS} ${WEBRTC_HEA
 
 target_link_libraries(${PROJECT_NAME} -ljsoncpp -lpthread)
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC WEBRTC_POSIX)
+target_compile_definitions(${PROJECT_NAME} PUBLIC WEBRTC_POSIX REDBACK_DEBUG)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
