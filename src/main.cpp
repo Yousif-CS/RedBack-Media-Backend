@@ -1,7 +1,11 @@
+#include <functional>
+
 #include "CustomWebSocket.h"
 #include "ListeningServer.h"
 #include "EventSocket.h"
-#include <functional>
+#include "api/create_peerconnection_factory.h"
+
+#include "api/peer_connection_interface.h"
 
 //#include "jsoncpp/json/json.h"
 //#include "jsoncpp/json/value.h"
@@ -23,11 +27,11 @@ using tcp = boost::asio::ip::tcp;
 int main(int argc, char* argv[]) {
 	
 	if (argc < 3) {
-		std::cout << "Usage: [" << argv[0] << "] " << "[event] [payload]" << std::endl;
+		std::cout << "Usage: ./" << argv[0] << " " << "[host] [port]" << std::endl;
 		return EXIT_SUCCESS;
 	}
 	RedBack::ListeningServer server{ argv[1], static_cast<unsigned short>(std::atoi(argv[2])) };
-	
+
 	while (true) {
 		std::shared_ptr<RedBack::WebSocket<tcp::socket>> ws = server.accept();
 		RedBack::EventSocket<RedBack::WebSocket<tcp::socket>> es{ *ws };

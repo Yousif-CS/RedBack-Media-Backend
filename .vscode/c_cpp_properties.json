@@ -4,13 +4,18 @@
             "name": "RedBack-Media-Backend",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/boost_1_73_0"
+                "${workspaceFolder}/boost_1_73_0",
+                "${workspaceFolder}/webrtc-checkout/src",
+                "${workspaceFolder}/abseil/include"
             ],
-            "defines": [],
-            "compilerPath": "/usr/bin/g++-7",
+            "defines": [
+                "WEBRTC_POSIX"
+            ],
+            "compilerPath": "/usr/bin/clang++-6.0",
             "cStandard": "c11",
             "cppStandard": "c++14",
-            "intelliSenseMode": "${default}"
+            "intelliSenseMode": "${default}",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4

@@ -5,19 +5,22 @@ include(CTest)
 enable_testing()
 
 set(EXECUTABLE_OUTPUT_PATH ./${CMAKE_BUILD_TYPE})
-set(BOOST_HEADERS ./boost_1_73_0)
-
+set(BOOST_HEADERS boost_1_73_0)
+set(WEBRTC_HEADERS webrtc-checkout/src)
+set(ABSEIL_HEADERS abseil/include)
 file(
     GLOB_RECURSE
     MY_SOURCE_FILES
     src/*
 )
 
-add_executable(RedBack-Media-Backend ${MY_SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${MY_SOURCE_FILES})
 
-target_include_directories(RedBack-Media-Backend PRIVATE ${BOOST_HEADERS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${BOOST_HEADERS} ${WEBRTC_HEADERS} ${ABSEIL_HEADERS})
 
-target_link_libraries(RedBack-Media-Backend -ljsoncpp -lpthread)
+target_link_libraries(${PROJECT_NAME} -ljsoncpp -lpthread)
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC WEBRTC_POSIX)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
