@@ -49,7 +49,7 @@ namespace RedBack {
 			
 			// Default behaviour: echo back payload
 			set_on_receive([this](std::string payload) {
-#ifdef _REDBACK_MEDIA_DEBUG
+#ifdef REDBACK_DEBUG
 				std::cout << "Received: " << payload << std::endl;
 #endif // _REDBACK_MEDIA_DEBUG
 
@@ -62,7 +62,7 @@ namespace RedBack {
 				}
 			));
 			// Debug purposes
-#ifdef _REDBACK_MEDIA_DEBUG
+#ifdef REDBACK_DEBUG
 			ws_->control_callback(
 				[this](websocket::frame_type ft, boost::beast::string_view payload) {
 					log(ft, payload);

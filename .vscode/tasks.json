@@ -11,7 +11,7 @@
             },
             "command": "cmake",
             "args": [
-                "-DCMAKE_BUILD_TYPE=Debug",".."
+                "-DCMAKE_BUILD_TYPE=Debug", "-DCMAKE_FIND_ROOT_PATH=$PWD", ".."
             ],
             "problemMatcher": [
                 "$gcc"
@@ -37,7 +37,7 @@
             },
             "command": "cmake",
             "args": [
-                "-DCMAKE_BUILD_TYPE=Release", ".."
+                "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_FIND_ROOT_PATH=$(pwd)", ".."
             ]
         }
     ]

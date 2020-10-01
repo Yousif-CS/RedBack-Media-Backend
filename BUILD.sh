@@ -73,6 +73,10 @@ mkdir build && cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$(pwd)/../../abseil
 cmake --build . --target install
 cd ../..
-# Cleanup
 
+# changing the compiler to clang++
+export CXX="/usr/bin/clang++"
+
+# Cleanup
+rm -rf depot_tools
 rm boost_1_73_0.tar.gz

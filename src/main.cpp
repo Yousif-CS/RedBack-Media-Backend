@@ -3,9 +3,7 @@
 #include "CustomWebSocket.h"
 #include "ListeningServer.h"
 #include "EventSocket.h"
-#include "api/create_peerconnection_factory.h"
-
-#include "api/peer_connection_interface.h"
+#include "PeerConnectionBuilder.h"
 
 //#include "jsoncpp/json/json.h"
 //#include "jsoncpp/json/value.h"
@@ -35,6 +33,9 @@ int main(int argc, char* argv[]) {
 	while (true) {
 		std::shared_ptr<RedBack::WebSocket<tcp::socket>> ws = server.accept();
 		RedBack::EventSocket<RedBack::WebSocket<tcp::socket>> es{ *ws };
+		// PeerConnectionBuilder<RedBack::EventSocket<RedBack::WebSocket<tcp::socket>>> pcb{es};
+		// pcb.get_peer_connection();
+		// std::cout << "Peer Connection established!" << std::endl;
 	}
 	//RedBack::Client::establish<void>("localhost", "6969", [argv](WebSocketClient& ws) {
 	//	std::string eventName;

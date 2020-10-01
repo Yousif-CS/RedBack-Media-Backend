@@ -20,7 +20,7 @@ public:
 
     // Returns the newly created peer connection; if it is available
     // otherwise; blocks until it is ready
-    std::shared_ptr<webrtc::PeerConnectionInterface> get_peer_connection();
+    rtc::scoped_refptr<webrtc::PeerConnectionInterface> get_peer_connection();
 
     std::shared_ptr<PeerConnectionBuilder<T>> getPtr(){
         return this->shared_from_this();

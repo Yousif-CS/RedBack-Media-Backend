@@ -21,7 +21,9 @@ namespace RedBack {
 		:t_{t}
 		{
 			default_callback_ = t.get_on_receive_callback();
-			t.set_on_receive([this](std::string payload) { event_forward(payload); });
+			t.set_on_receive([this](std::string payload) {
+				event_forward(payload);
+			});
 		}
 		
 		/*
@@ -58,14 +60,20 @@ namespace RedBack {
 		void event_forward(std::string payload) {
 			Json::Value root;
 			Json::Reader reader;
+
+			//if its not a json object or the event is not found, use the default callback
 			if (!reader.parse(payload.c_str(), root)) {
-				throw std::runtime_error("Error: Could not parse payload");
-			}
+
+				default_callback_(payload);	
 			
-			if (eventCallbacks_.find(root["eventName"].asString()) == eventCallbacks_.end()){
-				default_callback_(root["payload"].asString());	
-			}else {
+			} else if (eventCallbacks_.find(root["eventName"].asString()) == eventCallbacks_.end()) {
+			
+				default_callback_(root["payload"].asString());
+			
+			} else {
+			
 				eventCallbacks_[root["eventName"].asString()](root["payload"].asString());
+			
 			}
 
 		}
