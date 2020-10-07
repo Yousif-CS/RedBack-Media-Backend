@@ -32,6 +32,11 @@ public:
     virtual void OnDataChannel(
       rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel) override;
 
+    // Triggered when a new track is added
+    void OnTrack(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver) override;
+    
+    virtual ~PeerConnectionObserverImp() = default;
+    
 private:
     std::function<void(rtc::scoped_refptr<webrtc::DataChannelInterface>)> data_channel_callback_;
     std::function<void(const webrtc::IceCandidateInterface*)> ice_candidate_callback_;

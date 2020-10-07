@@ -31,7 +31,7 @@ namespace RedBack {
 		*/
 		void on_event(std::string eventName, std::function<void(std::string)> callback)
 		{
-			eventCallbacks_[eventName] = callback;
+			eventCallbacks_.insert(std::pair<std::string, std::function<void(std::string)>>(eventName, callback));
 		}
 		
 		void set_default_callback(std::function<void(std::string)> callback)
@@ -60,21 +60,22 @@ namespace RedBack {
 		void event_forward(std::string payload) {
 			Json::Value root;
 			Json::Reader reader;
-
 			//if its not a json object or the event is not found, use the default callback
 			if (!reader.parse(payload.c_str(), root)) {
 
 				default_callback_(payload);	
 			
-			} else if (eventCallbacks_.find(root["eventName"].asString()) == eventCallbacks_.end()) {
-			
+			} else if (eventCallbacks_.count(root["eventName"].asString()) == 0) {
 				default_callback_(root["payload"].asString());
 			
 			} else {
 			
-				eventCallbacks_[root["eventName"].asString()](root["payload"].asString());
+				eventCallbacks_.at(root["eventName"].asString())(root["payload"].asString());
 			
 			}
+#ifdef REDBACK_DEBUG
+			std::cout << root["eventName"].asString() << std::endl;
+#endif //REDBACK_DEBUG
 
 		}
 

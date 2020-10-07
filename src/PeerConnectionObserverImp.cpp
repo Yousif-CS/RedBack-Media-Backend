@@ -81,3 +81,13 @@ void PeerConnectionObserverImp::OnDataChannel(
     data_channel_callback_(data_channel);
 
 }
+
+void PeerConnectionObserverImp::OnTrack(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver)
+{
+    // rtc::scoped_refptr<webrtc::MediaStreamTrackInterface> track = transceiver->receiver()->track();
+    // if (track->kind() == webrtc::MediaStreamTrackInterface::kVideoKind)
+    // {
+    //     static_cast<webrtc::VideoTrackInterface *>(track.get())
+    //         ->AddOrUpdateSink(const_cast<VideoRenderer>)
+    // }
+}

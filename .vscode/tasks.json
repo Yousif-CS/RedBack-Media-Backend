@@ -37,7 +37,7 @@
             },
             "command": "cmake",
             "args": [
-                "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_FIND_ROOT_PATH=$(pwd)", ".."
+                "-DCMAKE_BUILD_TYPE=Release", "-DCMAKE_FIND_ROOT_PATH=$PWD", ".."
             ]
         }
     ]

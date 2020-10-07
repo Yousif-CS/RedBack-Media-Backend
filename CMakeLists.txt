@@ -7,7 +7,7 @@ enable_testing()
 
 set(EXECUTABLE_OUTPUT_PATH ./${CMAKE_BUILD_TYPE})
 set(BOOST_HEADERS boost_1_73_0)
-   
+set(VIDEO_TRACK_SOURCE ./webrtc-checkout/src/pc/video_track_source.cc)
 set(WEBRTC_HEADERS webrtc-checkout/src)
 set(ABSEIL_HEADERS abseil/include)
 
@@ -22,7 +22,7 @@ file(
     src/*
 )
 
-add_executable(${PROJECT_NAME} ${MY_SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${MY_SOURCE_FILES} ${VIDEO_TRACK_SOURCE})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${BOOST_HEADERS} ${WEBRTC_HEADERS} ${ABSEIL_HEADERS})
 

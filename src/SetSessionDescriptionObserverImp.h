@@ -4,14 +4,22 @@
 
 #include <iostream>
 #include "api/peer_connection_interface.h"
+#include "boost/asio.hpp"
+#include "boost/beast/websocket.hpp"
+
+#include "EventSocket.h"
+#include "CustomWebSocket.h"
 
 class SetSessionDescriptionObserverImp: public webrtc::SetSessionDescriptionObserver {
 
 public:
+
     void OnSuccess() override {
+
 #ifdef REDBACK_DEBUG
         std::cout << "Session Description Set Correctly!" << std::endl;
 #endif //REDBACK_DEBUB
+
     }
 
     void OnFailure(webrtc::RTCError error) override {

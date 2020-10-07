@@ -10,7 +10,8 @@
             ],
             "defines": [
                 "WEBRTC_POSIX",
-                "REDBACK_DEBUG"
+                "REDBACK_DEBUG",
+                "__FILE__=\"log.txt\""
             ],
             "compilerPath": "/usr/bin/clang++-6.0",
             "cStandard": "c11",

@@ -14,19 +14,16 @@
 
 namespace ip = boost::asio::ip;
 
-class CreateSessionDescriptionObserverImp: public webrtc::CreateSessionDescriptionObserver {
+struct CreateSessionDescriptionObserverImp: public webrtc::CreateSessionDescriptionObserver {
 
-public:
     CreateSessionDescriptionObserverImp(rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection,
         RedBack::EventSocket<RedBack::WebSocket<ip::tcp::socket>>& signaling_channel)
         :peer_connection_(peer_connection), signaling_channel_(signaling_channel)
         {
         }
     
-    void OnSuccess(webrtc::SessionDescriptionInterface *desc) override;
-    void OnFailure(webrtc::RTCError error) override;
-
-private:
+    virtual void OnSuccess(webrtc::SessionDescriptionInterface *desc) override;
+    virtual void OnFailure(webrtc::RTCError error) override;
     
     RedBack::EventSocket<RedBack::WebSocket<ip::tcp::socket>>& signaling_channel_;
     const rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_;
