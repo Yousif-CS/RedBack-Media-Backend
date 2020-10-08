@@ -12,6 +12,8 @@
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
 #include "api/video_codecs/builtin_video_decoder_factory.h"
 #include "api/video_codecs/builtin_video_encoder_factory.h"
+#include "rtc_base/rtc_certificate_generator.h"
+#include "rtc_base/ssl_adapter.h"
 
 #include "PeerConnectionBuilder.h"
 #include "PeerConnectionObserverImp.h"
@@ -69,62 +71,34 @@ void PeerConnectionBuilder<T>::configure(){
         }
     });
 
-    t_.on_event("sdp_offer", [this](std::string offer){
+    t_.on_event("sdp_answer", [this](std::string answer){
 
 #ifdef REDBACK_DEBUG
-        std::cout << "Received sdp offer: " << offer << std::endl;
+        std::cout << "Received sdp answer: " << answer << std::endl;
 #endif //REDBACK_DEBUG
-        
-        // Creating the peer connection stuff
-        this->create_peer_connection();
-        
-        // Add a video track to it (which currently is just the webcam on the laptop)
-        //this->add_video_track();
 
         // An object to hold the error 
         webrtc::SdpParseError error;
         // Create a remote session description from the answer and set it 
         std::unique_ptr<webrtc::SessionDescriptionInterface> 
-                session_description(webrtc::CreateSessionDescription(webrtc::SdpType::kOffer, offer, &error));
+                session_description(webrtc::CreateSessionDescription(webrtc::SdpType::kAnswer, answer, &error));
         
         if (error.description != ""){
-            std::cerr << "Error creating offer: " << error.description << std::endl;
+            std::cerr << "Error creating answer: " << error.description << std::endl;
             exit(EXIT_FAILURE);
         }
-        // this->peer_connection_->signaling_thread()->Invoke(RTC_FROM_HERE,
-        //     std::make_unique<QueuedTask<webrtc::SessionDescriptionInterface *>>
-        //                 ([this](webrtc::SessionDescriptionInterface * desc)-> bool
-        //                             {
-        //                                 this->peer_connection_->SetRemoteDescription(
-        //                                     new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(), desc);
-        //                                 return true;
-        //                             },
-        //                             session_description.release()));
+
         this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
             [this, &session_description]()-> void {
                 this->get_peer_connection()->SetRemoteDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(),
                                 session_description.release());
             });
-        // this->peer_connection_->SetRemoteDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(),
-        //                                              session_description.release());
-        this->add_video_track();
-        //create an answer and send it 
-        // this->peer_connection_->signaling_thread()->Invoke<bool>(RTC_FROM_HERE,
-        //     std::make_unique<QueuedTask<>>([this]() -> bool{
-        //         this->peer_connection_->CreateAnswer(new rtc::RefCountedObject<CreateSessionDescriptionObserverImp>(this->peer_connection_, this->t_),
-        //                     webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-        //         return true;
-        //     })
-        // );
-        this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
-            [this]()-> void {
-                this->get_peer_connection()->CreateAnswer(new rtc::RefCountedObject<CreateSessionDescriptionObserverImp>(this->get_peer_connection(), this->get_signaling_channel()),
-                        webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-            });
-        // this->peer_connection_->CreateAnswer(new rtc::RefCountedObject<CreateSessionDescriptionObserverImp>(this->peer_connection_, this->t_),
-        //         webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
 
     });
+    // Creating the peer connection stuff
+    this->create_peer_connection();
+    this->add_video_track();
+    this->create_offer();
 }
 
 template<typename T>
@@ -155,24 +129,27 @@ void PeerConnectionBuilder<T>::create_peer_connection(){
 
     webrtc::PeerConnectionInterface::IceServer iceServer;
     
-    iceServer.urls.push_back("stun:stun.l.google.com:19302");
+    iceServer.urls.push_back("stun:stun.stunprotocol.org");
+    iceServer.urls.push_back("turn:numb.viagenie.ca");
+    iceServer.username = "webrtc@live.com";
+    iceServer.password = "muazkh";
     
     webrtc::PeerConnectionInterface::RTCConfiguration config;
-    // config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
-    // config.enable_dtls_srtp = true;
+    config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
+    config.enable_dtls_srtp = true;
 
 
     config.servers.push_back(iceServer);
 
+    create_threads();
     // Create the peer connection factory
     // We do not need to provide the nullptr values as they are 
     // implicitly created in the API
     pcf_ = webrtc::CreatePeerConnectionFactory(
-        nullptr /*network thread*/, nullptr /*worker thread*/, nullptr/*signaling thread*/, nullptr /*default adm*/,
+        network_thread_.get() /*network thread*/, worker_thread_.get() /*worker thread*/, signaling_thread_.get()/*signaling thread*/, nullptr /*default adm*/,
         webrtc::CreateBuiltinAudioEncoderFactory(), webrtc::CreateBuiltinAudioDecoderFactory(),
         webrtc::CreateBuiltinVideoEncoderFactory(), webrtc::CreateBuiltinVideoDecoderFactory(),
         nullptr /*audio mixer*/, nullptr /*audio_processing*/);
-
 
     peer_connection_ = pcf_->CreatePeerConnection(config, nullptr, nullptr, observer.release());
 
@@ -181,10 +158,37 @@ void PeerConnectionBuilder<T>::create_peer_connection(){
 template<typename T>
 void PeerConnectionBuilder<T>::add_video_track(){
     auto videoSrc = new rtc::RefCountedObject<VideoTrackSourceImp>();
-    auto videoTrack = pcf_->CreateVideoTrack("camera test", videoSrc);
+    auto videoTrack = pcf_->CreateVideoTrack("video_label", videoSrc);
 
-    auto ret = peer_connection_->AddTrack(videoTrack, {"web camera test"});
+    auto ret = peer_connection_->AddTrack(videoTrack, {"stream_id"});
     assert(ret.ok());
 }
 
+template<typename T>
+void PeerConnectionBuilder<T>::create_threads(){
+
+    rtc::InitializeSSL();
+    
+    network_thread_ = rtc::Thread::CreateWithSocketServer();
+    network_thread_->SetName("pc_network_thread", nullptr);
+    network_thread_->Start();
+
+    worker_thread_ = rtc::Thread::Create();
+    worker_thread_->SetName("pc_worker_thread", nullptr);
+    worker_thread_->Start();
+
+    signaling_thread_ = rtc::Thread::Create();
+    signaling_thread_->SetName("pc_signaling_thread", nullptr);
+    signaling_thread_->Start();
+
+}
+
+template<typename T>
+void PeerConnectionBuilder<T>::create_offer(){
+        this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
+        [this]()-> void {
+            this->get_peer_connection()->CreateOffer(new rtc::RefCountedObject<CreateSessionDescriptionObserverImp>(this->get_peer_connection(), this->get_signaling_channel()),
+                    webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+        });
+}
 template class PeerConnectionBuilder<RedBack::EventSocket<RedBack::WebSocket<ip::tcp::socket>>>;

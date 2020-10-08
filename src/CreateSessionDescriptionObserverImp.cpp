@@ -4,11 +4,12 @@
 
 #include "CreateSessionDescriptionObserverImp.h"
 #include "SetSessionDescriptionObserverImp.h"
+#include "jsoncpp/json/value.h"
 
 void CreateSessionDescriptionObserverImp::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {   
 
-    std::cout << "Answer created!" << std::endl;
+    std::cout << "Offer created!" << std::endl;
     
     //set the local description of the peer connection
     peer_connection_->SetLocalDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(), desc);
@@ -16,7 +17,12 @@ void CreateSessionDescriptionObserverImp::OnSuccess(webrtc::SessionDescriptionIn
     //serialize and send the created offer
     std::string sdp;
     desc->ToString(&sdp);
-    signaling_channel_.emit_event("sdp_answer", sdp);
+    Json::Value answer;
+    answer["type"] = "offer";
+    answer["sdp"] = sdp;
+    Json::FastWriter writer;
+    std::cout << writer.write(answer) << std::endl;
+    signaling_channel_.emit_event("sdp_offer", writer.write(answer));
 }
 
 void CreateSessionDescriptionObserverImp::OnFailure(webrtc::RTCError error){

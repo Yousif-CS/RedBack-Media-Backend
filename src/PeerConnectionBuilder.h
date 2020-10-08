@@ -22,7 +22,7 @@ public:
     // otherwise; blocks until it is ready
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> get_peer_connection();
 
-    //get the signaling channel
+    // Get the signaling channel
     T& get_signaling_channel() { return t_; };
 
     std::shared_ptr<PeerConnectionBuilder<T>> getPtr(){
@@ -31,12 +31,19 @@ public:
 
 private:
     
-    //setup event listeners and establish the connection
+    // Setup event listeners and establish the connection
     void configure();
-    //the steps required in setting up a connection (optional step of adding video track)
+    // The steps required in setting up a connection (optional step of adding video track)
+    // Create the threads required for the various connection establishment and maintenance
+    // operations.
+    void create_threads();
     void create_peer_connection();
     void add_video_track();
-
+    void create_offer();
+    
+    std::unique_ptr<rtc::Thread> network_thread_;
+    std::unique_ptr<rtc::Thread> signaling_thread_;
+    std::unique_ptr<rtc::Thread> worker_thread_;
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> pcf_ = nullptr;
     rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel_ = nullptr;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_ = nullptr;
