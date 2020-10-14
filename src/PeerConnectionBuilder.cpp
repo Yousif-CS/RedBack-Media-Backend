@@ -88,24 +88,27 @@ void PeerConnectionBuilder<T>::configure(){
             exit(EXIT_FAILURE);
         }
 
-        // this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
-        //     [this, &session_description]()-> void {
-                
-        //     });
         this->get_peer_connection()->SetRemoteDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(),
                                 session_description.release());
     });
     // Creating the peer connection stuff
     this->create_peer_connection();
-    this->add_video_track();
+    
+    if (want_audio_stream())
+        this->add_audio_track();
+    
+    if (want_video_stream())
+        this->add_video_track();
+    
+
+    if (want_data_channel())
+        this->add_data_channel();
+
     this->create_offer();
 }
 
 template<typename T>
 rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnectionBuilder<T>::get_peer_connection(){
-    // while(peer_connection_ != nullptr && peer_connection_->peer_connection_state() != webrtc::PeerConnectionInterface::PeerConnectionState::kConnected){
-    //     // keep waiting until the peer connection is ready
-    // }
     return peer_connection_;
 }
 
@@ -192,10 +195,24 @@ void PeerConnectionBuilder<T>::create_threads(){
 
 template<typename T>
 void PeerConnectionBuilder<T>::create_offer(){
-        // this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
-        // [this]()-> void {
         this->get_peer_connection()->CreateOffer(new rtc::RefCountedObject<CreateSessionDescriptionObserverImp>(this->get_peer_connection(), this->get_signaling_channel()),
                 webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-        // });
 }
+
+template<typename T>
+void PeerConnectionBuilder<T>::add_audio_track(){
+        
+        static auto audioSrc = pcf_->CreateAudioSource(cricket::AudioOptions());
+        static auto audioTrack = pcf_->CreateAudioTrack("audio_track", audioSrc);
+        
+        auto ret = this->get_peer_connection()->AddTrack(audioTrack, {"audio_id"});        
+        
+        assert(ret.ok());
+}
+
+template<typename T>
+void PeerConnectionBuilder<T>::add_data_channel(){
+    // TODO
+}
+
 template class PeerConnectionBuilder<RedBack::EventSocket<RedBack::WebSocket<ip::tcp::socket>>>;
