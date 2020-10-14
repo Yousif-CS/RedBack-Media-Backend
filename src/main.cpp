@@ -30,12 +30,16 @@ int main(int argc, char* argv[]) {
 	}
 	RedBack::ListeningServer server{ argv[1], static_cast<unsigned short>(std::atoi(argv[2])) };
 
+	std::vector<
+			std::shared_ptr<
+					PeerConnectionBuilder<
+						RedBack::EventSocket<
+							RedBack::WebSocket<tcp::socket>>>>> pcs;
 	while (true) {
 		std::shared_ptr<RedBack::WebSocket<tcp::socket>> ws = server.accept();
 		RedBack::EventSocket<RedBack::WebSocket<tcp::socket>> es{ *ws };
-		PeerConnectionBuilder<RedBack::EventSocket<RedBack::WebSocket<tcp::socket>>> pcb{es};
-		pcb.get_peer_connection();
-		std::cout << "Peer Connection established!" << std::endl;
+		pcs.push_back(std::make_shared<PeerConnectionBuilder<RedBack::EventSocket<RedBack::WebSocket<tcp::socket>>>>(es));
+		std::cout << "Peer Connection request!" << std::endl;
 	}
 	//RedBack::Client::establish<void>("localhost", "6969", [argv](WebSocketClient& ws) {
 	//	std::string eventName;
