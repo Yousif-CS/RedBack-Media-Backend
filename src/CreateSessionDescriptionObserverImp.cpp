@@ -17,12 +17,12 @@ void CreateSessionDescriptionObserverImp::OnSuccess(webrtc::SessionDescriptionIn
     //serialize and send the created offer
     std::string sdp;
     desc->ToString(&sdp);
-    Json::Value answer;
-    answer["type"] = "offer";
-    answer["sdp"] = sdp;
+    Json::Value offer;
+    offer["type"] = "offer";
+    offer["sdp"] = sdp;
     Json::FastWriter writer;
-    std::cout << writer.write(answer) << std::endl;
-    signaling_channel_.emit_event("sdp_offer", writer.write(answer));
+    std::cout << writer.write(offer) << std::endl;
+    signaling_channel_.emit_event("sdp_offer", writer.write(offer));
 }
 
 void CreateSessionDescriptionObserverImp::OnFailure(webrtc::RTCError error){
