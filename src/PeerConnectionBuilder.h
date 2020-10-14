@@ -25,6 +25,20 @@ public:
     // Get the signaling channel
     T& get_signaling_channel() { return t_; };
 
+    // Check whether you want a data channel to be created
+    // Default is false; override to change
+    virtual bool want_data_channel() const { return false; }
+    
+    // Checks whether you want to stream video from the server to 
+    // the other end
+    // Default is true; override to change
+    virtual bool want_video_stream() const  { return true; }
+
+    // Checks whether you want to stream audio from the server to 
+    // the other end
+    // Default is true; override to change
+    virtual bool want_audio_stream() const  { return true; }
+
     std::shared_ptr<PeerConnectionBuilder<T>> getPtr(){
         return this->shared_from_this();
     }
@@ -39,6 +53,8 @@ private:
     void create_threads();
     void create_peer_connection();
     void add_video_track();
+    void add_audio_track();
+    void add_data_channel();
     void create_offer();
     
     std::unique_ptr<rtc::Thread> network_thread_;
