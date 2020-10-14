@@ -88,12 +88,12 @@ void PeerConnectionBuilder<T>::configure(){
             exit(EXIT_FAILURE);
         }
 
-        this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
-            [this, &session_description]()-> void {
-                this->get_peer_connection()->SetRemoteDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(),
+        // this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
+        //     [this, &session_description]()-> void {
+                
+        //     });
+        this->get_peer_connection()->SetRemoteDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(),
                                 session_description.release());
-            });
-
     });
     // Creating the peer connection stuff
     this->create_peer_connection();
@@ -119,7 +119,14 @@ void PeerConnectionBuilder<T>::create_peer_connection(){
         std::string payload;
         
         ice_candidate->ToString(&payload);
-        this->get_signaling_channel().emit_event("icecandidate", payload);
+
+        Json::Value candidate;
+        Json::FastWriter writer;
+        candidate["candidate"] = payload;
+        candidate["sdpMid"] = ice_candidate->sdp_mid();
+        candidate["sdpMLineIndex"] = ice_candidate->sdp_mline_index();
+
+        this->get_signaling_channel().emit_event("icecandidate", writer.write(candidate));
     });
 
     // When the client opens a data channel, we save it
@@ -157,8 +164,8 @@ void PeerConnectionBuilder<T>::create_peer_connection(){
 
 template<typename T>
 void PeerConnectionBuilder<T>::add_video_track(){
-    auto videoSrc = new rtc::RefCountedObject<VideoTrackSourceImp>();
-    auto videoTrack = pcf_->CreateVideoTrack("video_label", videoSrc);
+    static auto videoSrc = new rtc::RefCountedObject<VideoTrackSourceImp>();
+    static auto videoTrack = pcf_->CreateVideoTrack("video_label", videoSrc);
 
     auto ret = peer_connection_->AddTrack(videoTrack, {"stream_id"});
     assert(ret.ok());
@@ -185,10 +192,10 @@ void PeerConnectionBuilder<T>::create_threads(){
 
 template<typename T>
 void PeerConnectionBuilder<T>::create_offer(){
-        this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
-        [this]()-> void {
-            this->get_peer_connection()->CreateOffer(new rtc::RefCountedObject<CreateSessionDescriptionObserverImp>(this->get_peer_connection(), this->get_signaling_channel()),
-                    webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-        });
+        // this->get_peer_connection()->signaling_thread()->template Invoke<void>(RTC_FROM_HERE,
+        // [this]()-> void {
+        this->get_peer_connection()->CreateOffer(new rtc::RefCountedObject<CreateSessionDescriptionObserverImp>(this->get_peer_connection(), this->get_signaling_channel()),
+                webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+        // });
 }
 template class PeerConnectionBuilder<RedBack::EventSocket<RedBack::WebSocket<ip::tcp::socket>>>;
