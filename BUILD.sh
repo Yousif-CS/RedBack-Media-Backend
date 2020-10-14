@@ -56,9 +56,9 @@ git merge master
 
 if [[ $1 = "Debug" ]]
 then
-	gn gen out/Debug && ninja -C out/Debug
+	gn gen out/Debug --args='use_custom_libcxx=false use_custom_libcxx_for_host=false' && ninja -C out/Debug
 else 
-	gn gen out/Release --args='is_debug=false' && ninja -C out/Release
+	gn gen out/Release --args='use_custom_libcxx=false use_custom_libcxx_for_host=false is_debug=false' && ninja -C out/Release
 fi
 
 # Installing Abseil: A collection of libraries that google's code base depeneds on
@@ -77,6 +77,22 @@ cd ../..
 # changing the compiler to clang++
 export CXX="/usr/bin/clang++"
 
+# generate the actual project build files
+cd $PROJECT_ROOT/build
+
+if [[ $1 = "Debug" ]]
+then
+	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_FIND_ROOT_PATH=$PWD ..
+else 
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_ROOT_PATH=$PWD ..
+fi
+
+# build using ninja
+ninja . 
+
+cd $PROJECT_ROOT
+
 # Cleanup
 rm -rf depot_tools
 rm boost_1_73_0.tar.gz
+
