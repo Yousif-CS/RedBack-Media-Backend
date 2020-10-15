@@ -24,25 +24,6 @@
 
 namespace ip = boost::asio::ip;
 
-// A class that contains tasks (or in other words methods)
-// to be invoked (posted) on the signaling thread;
-template<typename ... T>
-class QueuedTask: public webrtc::QueuedTask {
-
-    using bind_type = decltype(std::bind(std::declval<std::function<bool(T...)>>(), std::declval<T>()...));
-public:
-    QueuedTask(std::function<bool(T...)> task, T... t)
-    :bind_(task, std::forward<T>(t)...)
-    {}
-    
-    bool Run() override {
-        return bind_();
-    }
-
-private:
-    bind_type bind_;
-};
-
 template<typename T>
 void PeerConnectionBuilder<T>::configure(){
 
@@ -91,6 +72,7 @@ void PeerConnectionBuilder<T>::configure(){
         this->get_peer_connection()->SetRemoteDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(),
                                 session_description.release());
     });
+
     // Creating the peer connection stuff
     this->create_peer_connection();
     
@@ -100,7 +82,6 @@ void PeerConnectionBuilder<T>::configure(){
     if (want_video_stream())
         this->add_video_track();
     
-
     if (want_data_channel())
         this->add_data_channel();
 
@@ -111,6 +92,7 @@ template<typename T>
 rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnectionBuilder<T>::get_peer_connection(){
     return peer_connection_;
 }
+
 
 template<typename T>
 void PeerConnectionBuilder<T>::create_peer_connection(){
@@ -152,6 +134,7 @@ void PeerConnectionBuilder<T>::create_peer_connection(){
     config.servers.push_back(iceServer);
 
     create_threads();
+
     // Create the peer connection factory
     // We do not need to provide the nullptr values as they are 
     // implicitly created in the API
@@ -160,7 +143,7 @@ void PeerConnectionBuilder<T>::create_peer_connection(){
         webrtc::CreateBuiltinAudioEncoderFactory(), webrtc::CreateBuiltinAudioDecoderFactory(),
         webrtc::CreateBuiltinVideoEncoderFactory(), webrtc::CreateBuiltinVideoDecoderFactory(),
         nullptr /*audio mixer*/, nullptr /*audio_processing*/);
-
+    
     peer_connection_ = pcf_->CreatePeerConnection(config, nullptr, nullptr, observer.release());
 
 }
