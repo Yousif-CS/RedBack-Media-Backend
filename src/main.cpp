@@ -13,15 +13,6 @@
 #include "boost/asio/ip/tcp.hpp"
 using tcp = boost::asio::ip::tcp;
 
-//void emitEvent(WebSocketClient& ws,
-//	std::string eventName, std::string payload, std::function<void(WebSocketClient&)> callback) {
-//	Json::Value root;
-//	root["eventName"] = eventName;
-//	root["payload"] = payload;
-//	Json::FastWriter writer;
-//	RedBack::Client::send<void>(ws, writer.write(root), callback);
-//	
-//}
 int main(int argc, char* argv[]) {
 	
 	if (argc < 3) {
@@ -41,14 +32,6 @@ int main(int argc, char* argv[]) {
 		pcs.push_back(std::make_shared<PeerConnectionBuilder<RedBack::EventSocket<RedBack::WebSocket<tcp::socket>>>>(es));
 		std::cout << "Peer Connection request!" << std::endl;
 	}
-	//RedBack::Client::establish<void>("localhost", "6969", [argv](WebSocketClient& ws) {
-	//	std::string eventName;
-	//	std::string payload;
-	//	while (true) {
-	//		std::cin >> eventName >> payload;
-	//		emitEvent(ws, eventName, payload, [](WebSocketClient& ws) {});
-	//	}
-	//});
 
 	return 0;
 }
