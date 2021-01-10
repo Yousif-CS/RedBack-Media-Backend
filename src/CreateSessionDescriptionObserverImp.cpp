@@ -2,27 +2,41 @@
 
 #include <iostream>
 
-#include "CreateSessionDescriptionObserverImp.h"
+#include "PeerConnectionHelpers.h"
 #include "SetSessionDescriptionObserverImp.h"
 #include "jsoncpp/json/value.h"
+#include "jsoncpp/json/writer.h"
 
 void CreateSessionDescriptionObserverImp::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {   
 
-    std::cout << "Offer created!" << std::endl;
+    std::cout << "Session Description Created!" << std::endl;
     
     //set the local description of the peer connection
-    peer_connection_->SetLocalDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(), desc);
+    _peerConnection->SetLocalDescription(new rtc::RefCountedObject<SetSessionDescriptionObserverImp>(_peerConnection), desc);
 
-    //serialize and send the created offer
+    //serialize and send the created session description
     std::string sdp;
     desc->ToString(&sdp);
-    Json::Value offer;
-    offer["type"] = "offer";
-    offer["sdp"] = sdp;
+    Json::Value sess;
+    sess["sdp"] = sdp;
+
     Json::FastWriter writer;
-    std::cout << writer.write(offer) << std::endl;
-    signaling_channel_.emit_event("sdp_offer", writer.write(offer));
+
+    RedBack::Message<StreamEvents> msg;
+    
+    if (desc->GetType() == webrtc::SdpType::kOffer){
+        sess["type"] = "offer";    
+        msg.setID(StreamEvents::Offer);
+    }
+    else {
+        sess["type"] = "answer";
+        msg.setID(StreamEvents::Answer);
+
+    }
+    msg << writer.write(sess);
+
+    _peerConnection->GetConnection()->send(msg);
 }
 
 void CreateSessionDescriptionObserverImp::OnFailure(webrtc::RTCError error){

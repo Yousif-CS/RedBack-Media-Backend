@@ -1,0 +1,3 @@
+[submodule "thirdparty/WebRTC-build"]
+	path = thirdparty/WebRTC-build
+	url = https://github.com/Yousif-CS/WebRTC-build.git

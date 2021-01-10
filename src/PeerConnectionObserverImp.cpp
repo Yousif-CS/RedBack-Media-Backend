@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include "PeerConnectionObserverImp.h"
+#include "PeerConnectionCommon.h"
+
+#include "eventsocketcpp/RedBackMessage.h"
 
 void PeerConnectionObserverImp::OnSignalingChange(
         webrtc::PeerConnectionInterface::SignalingState new_state){
@@ -33,7 +36,11 @@ void PeerConnectionObserverImp::OnSignalingChange(
 #endif
 
 }
-    
+ 
+void PeerConnectionObserverImp::OnRenegotiationNeeded()
+{
+}
+
 // Called any time the IceGatheringState changes.
 void PeerConnectionObserverImp::OnIceGatheringChange(
       webrtc::PeerConnectionInterface::IceGatheringState new_state){
@@ -61,9 +68,7 @@ void PeerConnectionObserverImp::OnIceGatheringChange(
 // A new ICE candidate has been gathered.
 void PeerConnectionObserverImp::OnIceCandidate(const webrtc::IceCandidateInterface* candidate){
 
-#ifdef REDBACK_DEBUG
         std::cout << "Ice candidate gathered!" << std::endl;
-#endif //REDBACK_DEBUG
 
         //a callback to execute when an ice candidate is gathered
         ice_candidate_callback_(candidate);
@@ -73,9 +78,7 @@ void PeerConnectionObserverImp::OnIceCandidate(const webrtc::IceCandidateInterfa
 void PeerConnectionObserverImp::OnDataChannel(
       rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel){
 
-#ifdef REDBACK_DEBUG
         std::cout << "Data Channel open!" << std::endl;
-#endif //REDBACK_DEBUG
 
     //deal with the data channel
     data_channel_callback_(data_channel);
@@ -84,10 +87,6 @@ void PeerConnectionObserverImp::OnDataChannel(
 
 void PeerConnectionObserverImp::OnTrack(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> transceiver)
 {
-    // rtc::scoped_refptr<webrtc::MediaStreamTrackInterface> track = transceiver->receiver()->track();
-    // if (track->kind() == webrtc::MediaStreamTrackInterface::kVideoKind)
-    // {
-    //     static_cast<webrtc::VideoTrackInterface *>(track.get())
-    //         ->AddOrUpdateSink(const_cast<VideoRenderer>)
-    // }
+    // Track ready. At this point do nothing really. Later feature: Notify connected clients that
+    // A track is ready to be viewed
 }
