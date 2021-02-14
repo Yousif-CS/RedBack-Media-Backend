@@ -6,9 +6,17 @@
 #include <iostream>
 
 #include "api/peer_connection_interface.h"
-
+#include "PeerConnectionCommon.h"
 class PeerConnectionObserverImp: public webrtc::PeerConnectionObserver {
 public:
+
+
+    PeerConnectionObserverImp(std::shared_ptr<RedBack::Connection<StreamEvents>> conn)
+    : PeerConnectionObserver()
+    {
+        _connection = conn;
+    }
+
     void set_on_ice_candidate(std::function<void(const webrtc::IceCandidateInterface*)> callback){
         ice_candidate_callback_ = callback;
     }
@@ -16,6 +24,9 @@ public:
     void set_on_data_channel(std::function<void(rtc::scoped_refptr<webrtc::DataChannelInterface>)> callback){
         data_channel_callback_ = callback;
     }
+	
+	// We won't implement this method
+	virtual void OnRenegotiationNeeded() override;
 
     // Called when the signaling state changes
     virtual void OnSignalingChange(
@@ -38,6 +49,9 @@ public:
     virtual ~PeerConnectionObserverImp() = default;
     
 private:
+
+    std::shared_ptr<RedBack::Connection<StreamEvents>> _connection;
+
     std::function<void(rtc::scoped_refptr<webrtc::DataChannelInterface>)> data_channel_callback_;
     std::function<void(const webrtc::IceCandidateInterface*)> ice_candidate_callback_;
 };
